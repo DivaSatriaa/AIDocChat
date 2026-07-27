@@ -1,0 +1,19 @@
+# Virtual Environment
+venv/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+
+# Environment Variables
+.env
+
+# Chroma Database
+database/
+
+# VS Code
+.vscode/
+
+# macOS
+.DS_Store
