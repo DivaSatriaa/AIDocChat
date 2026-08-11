@@ -1,21 +1,11 @@
-import os
-
-from dotenv import load_dotenv
-from openai import OpenAI
-
-
-load_dotenv()
-
-client = OpenAI(
-    api_key=os.getenv("OPENAI_API_KEY")
-)
+from ollama import chat
 
 
 def ask_llm(question, context):
     prompt = f"""
-You are a helpful assistant answering questions based on the provided documents.
+You are a helpful assistant answering questions based on a document.
 
-Use ONLY the information from the context.
+Use ONLY the information provided in the context.
 
 If the answer cannot be found in the context, say:
 "I couldn't find the answer in the document."
@@ -27,9 +17,14 @@ Question:
 {question}
 """
 
-    response = client.responses.create(
-        model="gpt-5-mini",
-        input=prompt
+    response = chat(
+        model="qwen3:4b-instruct",
+        messages=[
+            {
+                "role": "user",
+                "content": prompt
+            }
+        ]
     )
 
-    return response.output_text
+    return response.message.content

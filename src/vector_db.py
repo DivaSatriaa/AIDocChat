@@ -1,6 +1,5 @@
 import chromadb
 
-
 client = chromadb.PersistentClient(
     path="database/chroma"
 )
@@ -11,6 +10,12 @@ collection = client.get_or_create_collection(
 
 
 def store_chunks(chunks, embeddings):
+
+    # Hapus data lama
+    collection.delete(
+        ids=collection.get()["ids"]
+    )
+
     ids = [
         f"chunk_{i}"
         for i in range(len(chunks))
