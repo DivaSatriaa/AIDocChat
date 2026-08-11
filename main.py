@@ -1,78 +1,52 @@
-from src.pdf_loader import load_pdf
-from src.chunker import chunk_text
-from src.embedder import create_embeddings
-from src.vector_db import store_chunks
 from src.retriever import search
 from src.llm import ask_llm
 
 
-# =========================
-# 1. LOAD PDF
-# =========================
+while True:
+    question = input("\nYou: ")
 
-pages = load_pdf("data/AIImpactForStudent.pdf")
+    if question.lower() in ["exit", "quit", "q"]:
+        print("Goodbye!")
+        break
 
-all_chunks = []
+    results = search(question)
 
-for page in pages:
-    chunks = chunk_text(page["text"])
+    documents = results["documents"][0]
+    metadatas = results["metadatas"][0]
+    distances = results["distances"][0]
 
-    for chunk in chunks:
-        all_chunks.append({
-            "page": page["page"],
-            "text": chunk
-        })
+    print("\n================ RETRIEVAL ================\n")
 
+    for i, document in enumerate(documents):
+        print(f"Result {i + 1}")
+        print(f"Page     : {metadatas[i]['page']}")
+        print(f"Distance : {distances[i]}")
+        print(f"Content  : {document[:300]}")
+        print("-" * 60)
 
-print(f"Pages : {len(pages)}")
-print(f"Chunks: {len(all_chunks)}")
+    context_parts = []
 
+    for i, document in enumerate(documents):
+        page = metadatas[i]["page"]
 
-# =========================
-# 2. CREATE EMBEDDINGS
-# =========================
+        context_parts.append(
+            f"[Source {i + 1} - Page {page}]\n{document}"
+        )
 
-texts = [chunk["text"] for chunk in all_chunks]
+    context = "\n\n".join(context_parts)
 
-embeddings = create_embeddings(texts)
+    answer = ask_llm(
+        question,
+        context
+    )
 
-print("\nEmbedding shape:")
-print(embeddings.shape)
+    print("\n================ ANSWER ================\n")
+    print(answer)
 
+    print("\n================ SOURCES ================\n")
 
-# =========================
-# 3. STORE TO VECTOR DB
-# =========================
-
-store_chunks(
-    all_chunks,
-    embeddings
-)
-
-print("Chunks successfully stored.")
-
-
-# =========================
-# 4. ASK QUESTION
-# =========================
-
-question = input("\nAsk something about the document: ")
-
-results = search(question)
-
-documents = results["documents"][0]
-
-context = "\n\n".join(documents)
-
-
-# =========================
-# 5. ASK LLM
-# =========================
-
-answer = ask_llm(
-    question,
-    context
-)
-
-print("\n================ ANSWER ================\n")
-print(answer)
+    for i, metadata in enumerate(metadatas):
+        print(
+            f"[Source {i + 1}] "
+            f"AIImpactForStudent.pdf - Page {metadata['page']}"
+        )

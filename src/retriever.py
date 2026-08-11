@@ -2,7 +2,7 @@ from src.embedder import model
 from src.vector_db import collection
 
 
-def search(query, top_k=5):
+def search(query, top_k=8):
     query_embedding = model.encode([query])
 
     results = collection.query(
