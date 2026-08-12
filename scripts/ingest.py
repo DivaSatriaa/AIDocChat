@@ -5,7 +5,7 @@ from src.vector_db import store_chunks
 
 
 PDF_PATH = "data/AIImpactForStudent.pdf"
-ROOM_ID = "room_1"
+ROOM_ID = "1"
 
 
 pages = load_pdf(PDF_PATH)

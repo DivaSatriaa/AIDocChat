@@ -1,11 +1,14 @@
 from sentence_transformers import SentenceTransformer
 
 
-model = SentenceTransformer("all-MiniLM-L6-v2")
+model = SentenceTransformer(
+    "paraphrase-multilingual-MiniLM-L12-v2"
+)
 
 
 def create_embeddings(texts):
     return model.encode(
         texts,
-        show_progress_bar=True
+        batch_size=32,
+        show_progress_bar=False
     )

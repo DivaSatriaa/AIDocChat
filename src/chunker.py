@@ -1,16 +1,66 @@
-def chunk_text(text, chunk_size=1500, overlap=300):
+import re
+
+
+def chunk_text(
+    text,
+    chunk_size=1500,
+    overlap=300
+):
+    text = re.sub(
+        r"\s+",
+        " ",
+        text
+    ).strip()
+
+    sentences = re.split(
+        r"(?<=[.!?])\s+",
+        text
+    )
+
     chunks = []
+    current_chunk = ""
 
-    start = 0
+    for sentence in sentences:
 
-    while start < len(text):
-        end = start + chunk_size
+        if (
+            len(current_chunk)
+            + len(sentence)
+            + 1
+            <= chunk_size
+        ):
 
-        chunk = text[start:end]
+            if current_chunk:
+                current_chunk += " "
 
-        if chunk.strip():
-            chunks.append(chunk)
+            current_chunk += sentence
 
-        start += chunk_size - overlap
+        else:
+
+            if current_chunk.strip():
+                chunks.append(
+                    current_chunk.strip()
+                )
+
+            overlap_text = (
+                current_chunk[-overlap:]
+            )
+
+            if " " in overlap_text:
+                overlap_text = (
+                    overlap_text[
+                        overlap_text.find(" ") + 1:
+                    ]
+                )
+
+            current_chunk = (
+                overlap_text
+                + " "
+                + sentence
+            )
+
+    if current_chunk.strip():
+        chunks.append(
+            current_chunk.strip()
+        )
 
     return chunks
