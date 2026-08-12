@@ -1,6 +1,9 @@
 from src.retriever import search
 from src.llm import ask_llm
+from src.chat import add_message, get_history
+from src.query_rewriter import rewrite_query
 
+ROOM_ID = "room_1"
 
 while True:
     question = input("\nYou: ")
@@ -9,7 +12,31 @@ while True:
         print("Goodbye!")
         break
 
-    results = search(question)
+    # =========================
+    # 1. GET CHAT HISTORY
+    # =========================
+
+    history = get_history()
+
+    # =========================
+    # 2. REWRITE QUERY
+    # =========================
+
+    search_query = rewrite_query(
+        question,
+        history,
+    )
+
+    print(f"\nSearch query: {search_query}")
+
+    # =========================
+    # 3. RETRIEVAL
+    # =========================
+
+    results = search(
+        ROOM_ID,
+        search_query
+        )
 
     documents = results["documents"][0]
     metadatas = results["metadatas"][0]
@@ -24,6 +51,10 @@ while True:
         print(f"Content  : {document[:300]}")
         print("-" * 60)
 
+    # =========================
+    # 4. BUILD CONTEXT
+    # =========================
+
     context_parts = []
 
     for i, document in enumerate(documents):
@@ -35,10 +66,26 @@ while True:
 
     context = "\n\n".join(context_parts)
 
+    # =========================
+    # 5. ASK OLLAMA
+    # =========================
+
     answer = ask_llm(
         question,
-        context
+        context,
+        history
     )
+
+    # =========================
+    # 6. SAVE CHAT HISTORY
+    # =========================
+
+    add_message("user", question)
+    add_message("assistant", answer)
+
+    # =========================
+    # 7. DISPLAY ANSWER
+    # =========================
 
     print("\n================ ANSWER ================\n")
     print(answer)

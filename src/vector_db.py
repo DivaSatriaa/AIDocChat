@@ -1,20 +1,19 @@
 import chromadb
 
+
 client = chromadb.PersistentClient(
     path="database/chroma"
 )
 
-collection = client.get_or_create_collection(
-    name="documents"
-)
 
-
-def store_chunks(chunks, embeddings):
-
-    # Hapus data lama
-    collection.delete(
-        ids=collection.get()["ids"]
+def get_collection(room_id):
+    return client.get_or_create_collection(
+        name=f"room_{room_id}"
     )
+
+
+def store_chunks(room_id, chunks, embeddings):
+    collection = get_collection(room_id)
 
     ids = [
         f"chunk_{i}"
